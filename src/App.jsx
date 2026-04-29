@@ -8,6 +8,7 @@ import useSpotify from './hooks/useSpotify'
 import useWeather from './hooks/useWeather'
 import useNews from './hooks/useNews'
 import useEvents from './hooks/useEvents'
+import useBriefing from './hooks/useBriefing'
 
 export default function App() {
   const [state, setState] = useState('idle')
@@ -16,6 +17,7 @@ export default function App() {
   const { getWeather } = useWeather()
   const { getNews } = useNews()
   const { addEvent, getEvents } = useEvents()
+  const { deliver } = useBriefing({ getWeather, getNews, getEvents })
 
   useEffect(() => {
     init()
@@ -36,6 +38,20 @@ export default function App() {
   const handleCommand = async (text) => {
     console.log('Command received:', text)
 
+    // Morning briefing
+    if (
+      text.includes('briefing') ||
+      text.includes('good morning') ||
+      text.includes('morning briefing') ||
+      text.includes('what is happening') ||
+      text.includes('my day')
+    ) {
+      setState('thinking')
+      const briefing = await deliver()
+      speak(briefing)
+      return
+    }
+
     // Weather
     if (text.includes('weather')) {
       setState('thinking')
@@ -54,14 +70,14 @@ export default function App() {
     }
 
     // Add event
-    if (text.includes('add') || text.includes('schedule') || text.includes('remind')) {
+    if (text.includes('add') || text.includes('remind')) {
       const event = addEvent(text)
       speak(`Got it Sir. I have added ${event.name} at ${event.time} to your schedule.`)
       return
     }
 
     // Get schedule
-    if (text.includes('schedule') || text.includes('what do i have') || text.includes('my day')) {
+    if (text.includes('schedule') || text.includes('what do i have')) {
       const schedule = getEvents()
       speak(schedule)
       return
