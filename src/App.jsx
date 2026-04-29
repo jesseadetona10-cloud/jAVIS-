@@ -7,6 +7,7 @@ import useVoice from './hooks/useVoice'
 import useSpotify from './hooks/useSpotify'
 import useWeather from './hooks/useWeather'
 import useNews from './hooks/useNews'
+import useEvents from './hooks/useEvents'
 
 export default function App() {
   const [state, setState] = useState('idle')
@@ -14,6 +15,7 @@ export default function App() {
   const { connect, init, play, pause, next, isConnected } = useSpotify()
   const { getWeather } = useWeather()
   const { getNews } = useNews()
+  const { addEvent, getEvents } = useEvents()
 
   useEffect(() => {
     init()
@@ -34,6 +36,7 @@ export default function App() {
   const handleCommand = async (text) => {
     console.log('Command received:', text)
 
+    // Weather
     if (text.includes('weather')) {
       setState('thinking')
       const report = await getWeather()
@@ -41,6 +44,7 @@ export default function App() {
       return
     }
 
+    // News
     if (text.includes('news') || text.includes('headlines')) {
       setState('thinking')
       const category = text.includes('world') ? 'general' : 'technology'
@@ -49,6 +53,21 @@ export default function App() {
       return
     }
 
+    // Add event
+    if (text.includes('add') || text.includes('schedule') || text.includes('remind')) {
+      const event = addEvent(text)
+      speak(`Got it Sir. I have added ${event.name} at ${event.time} to your schedule.`)
+      return
+    }
+
+    // Get schedule
+    if (text.includes('schedule') || text.includes('what do i have') || text.includes('my day')) {
+      const schedule = getEvents()
+      speak(schedule)
+      return
+    }
+
+    // Music
     if (text.includes('play')) {
       const query = text.replace('play', '').trim() || 'focus music'
       speak(`Playing ${query} Sir`)
