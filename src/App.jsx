@@ -5,11 +5,15 @@ import Orb from './components/Orb'
 import Input from './components/Input'
 import useVoice from './hooks/useVoice'
 import useSpotify from './hooks/useSpotify'
+import useWeather from './hooks/useWeather'
+import useNews from './hooks/useNews'
 
 export default function App() {
   const [state, setState] = useState('idle')
   const [ready, setReady] = useState(false)
   const { connect, init, play, pause, next, isConnected } = useSpotify()
+  const { getWeather } = useWeather()
+  const { getNews } = useNews()
 
   useEffect(() => {
     init()
@@ -29,6 +33,21 @@ export default function App() {
 
   const handleCommand = async (text) => {
     console.log('Command received:', text)
+
+    if (text.includes('weather')) {
+      setState('thinking')
+      const report = await getWeather()
+      speak(report)
+      return
+    }
+
+    if (text.includes('news') || text.includes('headlines')) {
+      setState('thinking')
+      const category = text.includes('world') ? 'general' : 'technology'
+      const report = await getNews(category)
+      speak(report)
+      return
+    }
 
     if (text.includes('play')) {
       const query = text.replace('play', '').trim() || 'focus music'
