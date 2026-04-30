@@ -8,8 +8,8 @@ export default function useNews() {
       )
       const data = await res.json()
 
-      if (!data.articles || data.articles.length === 0) {
-        return 'No news found right now Sir.'
+      if (data.status === 'error' || !data.articles || data.articles.length === 0) {
+        return 'No news available right now Sir.'
       }
 
       const headlines = data.articles
@@ -20,7 +20,7 @@ export default function useNews() {
       return `Here are the top headlines Sir. ${headlines}`
     } catch (e) {
       console.error('News error:', e)
-      return 'I could not fetch the news right now Sir.'
+      return 'No news available right now Sir.'
     }
   }
 

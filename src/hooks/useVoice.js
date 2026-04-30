@@ -37,7 +37,7 @@ export default function useVoice({ onWake, onCommand, onStateChange }) {
       const transcript = e.results[e.results.length - 1][0].transcript.trim().toLowerCase()
       console.log('Heard:', transcript)
 
-      if (transcript.includes('jarvis')) {
+if (transcript.includes('jarvis') || transcript.includes('javis') || transcript.includes('jarv')) {
         isAwake.current = true
         onStateChange('listening')
         onWake()
