@@ -11,6 +11,7 @@ const CLIENT_ID = process.env.VITE_SPOTIFY_CLIENT_ID
 const CLIENT_SECRET = process.env.VITE_SPOTIFY_CLIENT_SECRET
 const REDIRECT_URI = 'http://127.0.0.1:3001/auth/callback'
 
+// ── Spotify Auth ──────────────────────────────────────────
 app.get('/auth/login', (req, res) => {
   const scopes = [
     'user-read-playback-state',
@@ -46,6 +47,38 @@ app.get('/auth/callback', async (req, res) => {
   } catch (e) {
     console.error('Token error:', e.response?.data)
     res.status(500).json({ error: 'Token exchange failed' })
+  }
+})
+
+// ── ElevenLabs Text to Speech ─────────────────────────────
+app.post('/speak', async (req, res) => {
+  const { text } = req.body
+  try {
+    const response = await axios.post(
+      `https://api.elevenlabs.io/v1/text-to-speech/onwK4e9ZLuTAKqWW03F9`,
+      {
+        text,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+          style: 0.3,
+          use_speaker_boost: true,
+        },
+      },
+      {
+        headers: {
+          'xi-api-key': process.env.VITE_ELEVENLABS_KEY,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'arraybuffer',
+      }
+    )
+    res.set('Content-Type', 'audio/mpeg')
+    res.send(response.data)
+  } catch (e) {
+    console.error('ElevenLabs error:', Buffer.from(e.response?.data).toString())
+    res.status(500).json({ error: 'Speech failed' })
   }
 })
 
